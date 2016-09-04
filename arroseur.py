@@ -25,7 +25,7 @@ def measure(out_pin, in_pin, n_av=100):
 
 
 class Arroseur(object):
-    _channels = [16, 17, 18, 21, 22]
+    _channels = [16, 22, 17, 18, 21]
     def __init__(self):
         self.n_channels = len(self._channels)
         self.timer = [None]*self.n_channels
@@ -84,5 +84,18 @@ class Arroseur(object):
         else:
             return int(self.on_time[index])
 
-ARROSEUR = Arroseur()
+    def get_channel_names(self):
+        try:
+            with open("channel_names.json", "r") as f:
+                return json.loads(f.read())
+        except IOError:
+            return ["Channel " + str(i) for i in xrange(self.n_channels)]
+    
+    def set_channel_name(self, index, name):
+        names = self.get_channel_names()
+        names[index] = name
+        with open("channel_names.json", "w") as f:
+            return f.write(json.dumps(names))
+    
 
+ARROSEUR = Arroseur()
