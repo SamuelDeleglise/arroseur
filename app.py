@@ -3,17 +3,19 @@ from flask import make_response
 from arroseur import ARROSEUR
 app = Flask(__name__)
 
+FONTSIZE = 24
+
 def get_fieldset(index):
     string = """<form action="change_timer" method="post">
 <fieldset id=fieldset%(index)i style="width: 90%%; background-color:%(color)s;">
 <legend onclick=change_name%(index)i()> %(name)s </legend>"""
     if not ARROSEUR.get_state(index):
-        string+="""time (s) <input style="width: 30px" "type="text" readOnly=false name="time%(index)i" id="time%(index)i" value=%(remaining_time)i>"""
-        string+="""<input type="submit" name="submit" id="submit%(index)i" value="Motor %(index)i: Go">
+        string+="""time (s) <input style='width: 80px; font-size: %(fs)ipx;' "type="text" readOnly=false name="time%(index)i" id="time%(index)i" value=%(remaining_time)i>"""
+        string+="""<input type="submit" name="submit" id="submit%(index)i" style="font-size: %(fs)ipx; height:60px" value="Motor %(index)i: Go">
 </fieldset>"""
     else:
-        string+="""time (s) <input style="width: 30px" type="text" readOnly=true name="time%(index)i" id="time%(index)i" value=%(remaining_time)i>"""
-        string+="""<input type="submit" name="submit" id="submit%(index)i" value="Motor %(index)i: Stop">
+        string+="""time (s) <input style="width: 80px; font-size: %(fs)ipx;" type="text" readOnly=true name="time%(index)i" id="time%(index)i" value=%(remaining_time)i>"""
+        string+="""<input type="submit" name="submit" style="font-size: %(fs)ipx;" id="submit%(index)i" value="Motor %(index)i: Stop">
 </fieldset>"""
     string+=""" 
 <script>
@@ -41,7 +43,9 @@ function change_name%(index)i() {
     form.appendChild(hiddenField2);
 
     document.body.appendChild(form);
-    form.submit();
+    if(name!=null) {
+        form.submit();
+    }
 }
 
 var timer%(index)i = document.getElementById("time%(index)i")
@@ -73,17 +77,18 @@ var timer%(index)i = document.getElementById("time%(index)i")
                          on_time=ARROSEUR.on_time[index],
                          remaining_time=ARROSEUR.get_remaining_time(index),
                          color='red' if ARROSEUR.get_state(index) else 'green',
-                         name=names[index])
+                         name=names[index],
+                         fs=FONTSIZE)
     return string
 
 @app.route("/")
 def home():
-    string = "<html>"
+    string = "<html style='font-size:%ipx;'>"%FONTSIZE
     on_off = ["<a href=/%i,1>0</a>", "<a href=/%i,0>1"]
     for index, state in enumerate(ARROSEUR.get_states()):
         #string+=on_off[state]%index
     	string+=get_fieldset(index)
-    string+="""<input type="submit" name="submit" id="submit_all" value="All Motors: Go">"""
+    string+="""<input type="submit" style="font-size: %i;" name="submit" id="submit_all" value="All Motors: Go">"""%FONTSIZE
     string+="</html>"
     return string
 
@@ -113,8 +118,6 @@ def bon():
 def change_name():
     name = request.form["name"]
     index = int(request.form["index"])
-    print index
-    print name
     ARROSEUR.set_channel_name(index, name)
     return home()
 

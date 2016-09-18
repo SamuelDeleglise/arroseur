@@ -4,6 +4,9 @@ from functools import partial
 import time
 from threading import Timer
 import json
+import os.path as osp
+
+PATH = osp.dirname(__file__)
 TIME = 0.003
 def measure(out_pin, in_pin, n_av=100):
 	g.setmode(g.BCM)
@@ -41,13 +44,13 @@ class Arroseur(object):
 	    
     def load_on_times(self):
         try:
-            with open("on_times.json", 'r') as f:
+            with open(osp.join(PATH, "on_times.json"), 'r') as f:
                 self.on_time = json.loads(f.read())
         except IOError:
             pass
     
     def save_on_times(self):
-        with open("on_times.json", 'w') as f:
+        with open(osp.join(PATH, "on_times.json"), 'w') as f:
             f.write(json.dumps(self.on_time))
 
     def set_state(self, index, state):
@@ -86,7 +89,7 @@ class Arroseur(object):
 
     def get_channel_names(self):
         try:
-            with open("channel_names.json", "r") as f:
+            with open(osp.join(PATH, "channel_names.json"), "r") as f:
                 return json.loads(f.read())
         except IOError:
             return ["Channel " + str(i) for i in xrange(self.n_channels)]
@@ -94,7 +97,7 @@ class Arroseur(object):
     def set_channel_name(self, index, name):
         names = self.get_channel_names()
         names[index] = name
-        with open("channel_names.json", "w") as f:
+        with open(osp.join(PATH, "channel_names.json"), "w") as f:
             return f.write(json.dumps(names))
     
 
